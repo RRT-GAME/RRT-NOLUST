@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CleanDays v2.0</title>
+<style>
+  body { font-family: system-ui, sans-serif; text-align: center; padding: 20px; background: #0f172a; color: #e2e8f0; margin:0; }
+ .container { max-width: 600px; margin: 0 auto; }
+ .streak { font-size: 64px; font-weight: 700; margin: 10px 0; color: #38bdf8; }
+ .btn { padding: 12px 24px; margin: 8px; border: none; border-radius: 12px; font-size: 16px; cursor: pointer; }
+ .btn-success { background: #22c55e; color: white; }
+ .btn-danger { background: #ef4444; color: white; }
+ .btn-ghost { background: #334155; color: white; }
+ .tipp-box { background: #1e293b; padding: 16px; border-radius: 12px; margin: 20px 0; font-size: 17px; }
+ .game-box { background: #1e293b; padding: 20px; border-radius: 12px; margin: 20px 0; display: none; }
+ .disclaimer { font-size: 12px; color: #94a3b8; margin-top: 40px; line-height: 1.5; }
+ .score { font-size: 24px; margin: 10px 0; }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>CleanDays</h1>
+  <p>Current Streak</p>
+  <div class="streak" id="streak">0</div>
+  <p>days</p>
+
+  <button class="btn btn-success" onclick="successDay()">I made it today</button>
+  <button class="btn btn-danger" onclick="resetStreak()">Reset</button>
+  <button class="btn btn-ghost" onclick="toggleGame()">Urge Hit? Play Game</button>
+
+  <div class="tipp-box" id="tipp"></div>
+  <button class="btn btn-ghost" onclick="newTipp()">New Tip</button>
+
+  <div class="game-box" id="gameBox">
+    <h3>Quick Distraction Game</h3>
+    <p>Tap the blue squares as fast as you can for 60s</p>
+    <div class="score" id="score">Score: 0</div>
+    <div id="gameArea" style="height:200px; position:relative; background:#0f172a; border-radius:8px;"></div>
+    <button class="btn btn-ghost" onclick="startGame()">Start 60s Game</button>
+  </div>
+
+  <p class="disclaimer">
+    <strong>Disclaimer:</strong> This app is for tracking and motivation only.
+    It does not guarantee recovery or cure. If you struggle with compulsive behavior
+    or feel overwhelmed, please consider reaching out to a licensed psychologist,
+    counselor, or trusted support service in your country.
+  </p>
+</div>
+
+<script>
+// Data
+const tipps = [
+  "Urges come in 5min waves. Set a timer and wait it out.",
+  "Delete Instagram/TikTok for 24h if it gets bad.",
+  "Go outside for 10min. No phone. Just walk.",
+  "Day 0 is better than day -1. Start again tomorrow.",
+  "Drink 500ml water. Often it's just thirst/restlessness.",
+  "Do 20 pushups. Get the adrenaline out.",
+  "Block porn sites with Cold Turkey or BlockSite.",
+  "Avoid boredom. Plan your evenings.",
+  "Sleep 8h. Tiredness triggers relapses."
+];
+
+let streak = parseInt(localStorage.getItem('streak') || '0');
+let lastDate = localStorage.getItem('lastDate') || '';
+let shownTipps = JSON.parse(localStorage.getItem('shownTipps') || '[]');
+
+document.getElementById('streak').innerText = streak;
+newTipp();
+
+// Core functions
+function successDay() {
+  const today = new Date().toDateString();
+  if (lastDate === today) {
+    alert("You already checked in today!");
+    return;
+  }
+  streak++;
+  lastDate = today;
+  saveData();
+  document.getElementById('streak').innerText = streak;
+}
+
+function resetStreak() {
+  if (confirm("Reset your streak?")) {
+    streak = 0;
+    lastDate = '';
+    saveData();
+    document.getElementById('streak').innerText = streak;
+  }
+}
+
+function saveData() {
+  localStorage.setItem('streak', streak);
+  localStorage.setItem('lastDate', lastDate);
+}
+
+function newTipp() {
+  let availableTipps = tipps.filter((_, i) =>!shownTipps.includes(i));
+  if (availableTipps.length === 0) {
+    shownTipps = [];
+    availableTipps = tipps;
+  }
+  const randomIndex = Math.floor(Math.random() * availableTipps.length);
+  const tippIndex = tipps.indexOf(availableTipps[randomIndex]);
+  shownTipps.push(tippIndex);
+  document.getElementById('tipp').innerText = tipps[tippIndex];
+  localStorage.setItem('shownTipps', JSON.stringify(shownTipps));
+}
+
+// Mini Game: Tap the target
+let gameRunning = false;
+let score = 0;
+let gameTimer;
+
+function toggleGame() {
+  const box = document.getElementById('gameBox');
+  box.style.display = box.style.display === 'block'? 'none' : 'block';
+}
+
+function startGame() {
+  if (gameRunning) return;
+  gameRunning = true;
+  score = 0;
+  document.getElementById('score').innerText = 'Score: 0';
+
+  let timeLeft = 60;
+  spawnTarget();
+
+  gameTimer = setInterval(() => {
+    timeLeft--;
+    if (timeLeft <= 0) {
+      clearInterval(gameTimer);
+      gameRunning = false;
+      alert("Time's up! Score: " + score + ". You made it through the urge!");
+    }
+  }, 1000);
+}
+
+function spawnTarget() {
+  if (!gameRunning) return;
+  const area = document.getElementById('gameArea');
+  area.innerHTML = '';
+
+  const target = document.createElement('div');
+  target.style.width = '50px';
+  target.style.height = '50px';
+  target.style.background = '#38bdf8';
+  target.style.borderRadius = '8px';
+  target.style.position = 'absolute';
+  target.style.left = Math.random() * (area.offsetWidth - 50) + 'px';
+  target.style.top = Math.random() * (area.offsetHeight - 50) + 'px';
+  target.style.cursor = 'pointer';
+
+  target.onclick = () => {
+    score++;
+    document.getElementById('score').innerText = 'Score: ' + score;
+    spawnTarget();
+  };
+
+  area.appendChild(target);
+  setTimeout(spawnTarget, 1200);
+}
+</script>
+</body>
+</html>
