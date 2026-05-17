@@ -1,167 +1,574 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="de">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CleanDays v2.0</title>
+<title>CleanDays v2.5</title>
+<meta name="theme-color" content="#0f172a">
+<meta name="description" content="Dein diskreter Streak-Tracker mit Tipps, Games und Blocker.">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="manifest" href="data:application/manifest+json,%7B%22name%22%3A%22CleanDays%22%2C%22short_name%22%3A%22CleanDays%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%230f172a%22%2C%22theme_color%22%3A%22%230f172a%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22data%3Aimage%2Fsvg%2Bxml%2C%253Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%20512%20512%27%253E%253Crect%20width%3D%27512%27%20height%3D%27512%27%20rx%3D%27112%27%20fill%3D%27%25230f172a%27%2F%253E%253Ccircle%20cx%3D%27256%27%20cy%3D%27256%27%20r%3D%27180%27%20fill%3D%27none%27%20stroke%3D%27%252338bdf8%27%20stroke-width%3D%2732%27%2F%253E%253Cpath%20d%3D%27M180%20260l60%2060%20120-140%27%20fill%3D%27none%27%20stroke%3D%27%252322c55e%27%20stroke-width%3D%2736%27%20stroke-linecap%3D%27round%27%20stroke-linejoin%3D%27round%27%2F%253E%253C%2Fsvg%253E%22%2C%22sizes%22%3A%22512x512%22%2C%22type%22%3A%22image%2Fsvg%2Bxml%22%2C%22purpose%22%3A%22any%20maskable%22%7D%5D%7D">
 <style>
-  body { font-family: system-ui, sans-serif; text-align: center; padding: 20px; background: #0f172a; color: #e2e8f0; margin:0; }
- .container { max-width: 600px; margin: 0 auto; }
- .streak { font-size: 64px; font-weight: 700; margin: 10px 0; color: #38bdf8; }
- .btn { padding: 12px 24px; margin: 8px; border: none; border-radius: 12px; font-size: 16px; cursor: pointer; }
- .btn-success { background: #22c55e; color: white; }
- .btn-danger { background: #ef4444; color: white; }
- .btn-ghost { background: #334155; color: white; }
- .tipp-box { background: #1e293b; padding: 16px; border-radius: 12px; margin: 20px 0; font-size: 17px; }
- .game-box { background: #1e293b; padding: 20px; border-radius: 12px; margin: 20px 0; display: none; }
- .disclaimer { font-size: 12px; color: #94a3b8; margin-top: 40px; line-height: 1.5; }
- .score { font-size: 24px; margin: 10px 0; }
+  :root{--bg:#0f172a;--card:#1e293b;--accent:#38bdf8;--success:#22c55e;--danger:#ef4444;--text:#e2e8f0;--muted:#94a3b8}
+  *{box-sizing:border-box} html,body{height:100%}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,sans-serif;-webkit-font-smoothing:antialiased;line-height:1.4}
+  .container{max-width:600px;margin:0 auto;padding:24px 16px 80px}
+  header h1{margin:0;font-size:28px;font-weight:800;letter-spacing:-.02em}
+  header h1 span{color:var(--accent);font-size:15px;font-weight:600;margin-left:6px}
+  .subtitle{color:var(--muted);margin:6px 0 24px;font-size:15px}
+  .card{background:var(--card);border-radius:20px;padding:20px;box-shadow:0 10px 30px rgba(0,0,0,.25),inset 0 1px 0 rgba(255,255,255,.03);margin-bottom:16px;border:1px solid rgba(148,163,184,.08)}
+  .streak-card{text-align:center;padding:34px 20px;background:radial-gradient(800px 300px at 50% -80px, rgba(56,189,248,.22), transparent 60%),var(--card)}
+  .streak-number{font-size:72px;font-weight:900;line-height:1;text-shadow:0 0 30px rgba(56,189,248,.25)}
+  .streak-label{color:var(--muted);margin-top:6px;font-size:13px;text-transform:uppercase;letter-spacing:.12em}
+  .best{margin-top:10px;font-size:14px;color:var(--accent);font-weight:600}
+  .stats-row{display:flex;gap:12px;margin-bottom:16px}
+  .stat{flex:1;background:rgba(15,23,42,.5);border:1px solid rgba(148,163,184,.12);padding:12px 14px;border-radius:14px;font-size:14px;color:var(--muted)}
+  .stat span{color:var(--text);font-weight:700;margin-left:4px}
+  .btn{width:100%;padding:16px;border:none;border-radius:14px;font-size:16px;font-weight:700;cursor:pointer;transition:transform .08s ease,background .2s,opacity .2s;position:relative;overflow:hidden}
+  .btn:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+  .btn:active{transform:scale(.98)}
+  .btn-success{background:linear-gradient(180deg,#22c55e,#16a34a);color:#052e16;box-shadow:0 10px 24px rgba(34,197,94,.22)}
+  .btn-row{display:flex;gap:8px;margin-top:12px}
+  .btn-ghost{background:transparent;border:1px solid rgba(148,163,184,.2);color:var(--text);padding:12px;font-weight:600}
+  .btn-ghost:hover{background:rgba(148,163,184,.08)}
+  .btn-danger{color:#fca5a5;border-color:rgba(239,68,68,.35)}
+  .btn-danger:hover{background:rgba(239,68,68,.1)}
+  .btn-accent{color:var(--accent);border-color:rgba(56,189,248,.35)}
+  .btn-accent:hover{background:rgba(56,189,248,.1)}
+  .btn-emergency{color:#fecaca;border-color:rgba(239,68,68,.5);background:rgba(239,68,68,.12)}
+  .btn-emergency:hover{background:rgba(239,68,68,.2)}
+  .btn-row .btn-ghost{flex:1;min-width:0;padding:12px 8px;font-size:14px}
+  .btn:disabled{opacity:.55;cursor:not-allowed}
+  .btn-danger.holding{color:#fecaca;background:rgba(239,68,68,.08)!important}
+  .btn-danger.holding::before{content:'';position:absolute;left:0;bottom:0;height:3px;width:calc(var(--hold,0)*1%);background:var(--danger);transition:width .05s linear;box-shadow:0 0 10px rgba(239,68,68,.6)}
+  .tip-card h2{margin:0 0 8px;font-size:15px;color:var(--muted);font-weight:600}
+  #tipText{font-size:17px;line-height:1.55;margin:0 0 12px;min-height:52px}
+  .link-btn{background:none;border:none;color:var(--accent);font-weight:600;cursor:pointer;padding:4px 0;font-size:14px}
+  .diary-card{padding:0}
+  .diary-header{display:flex;justify-content:space-between;align-items:center;padding:16px 20px;cursor:pointer}
+  .diary-header h2{margin:0;font-size:15px;color:var(--muted);font-weight:600;display:flex;align-items:center;gap:8px}
+  .diary-dot{width:8px;height:8px;background:var(--accent);border-radius:50%;box-shadow:0 0 8px rgba(56,189,248,.6);display:inline-block}
+  .diary-body{padding:0 20px 18px}
+  .diary-body textarea,.blocklist{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.15);border-radius:12px;color:var(--text);padding:12px;font-family:inherit;font-size:15px;resize:vertical;min-height:90px}
+  .diary-body textarea:focus,.blocklist:focus,.mini-input:focus{outline:2px solid var(--accent);outline-offset:2px;border-color:transparent}
+  .diary-footer{display:flex;justify-content:space-between;align-items:center;margin-top:10px}
+  .diary-counter{color:var(--muted);font-size:13px}
+  .btn-save{background:rgba(56,189,248,.12);border:1px solid rgba(56,189,248,.3);color:var(--accent);padding:8px 16px;border-radius:10px;font-weight:600;cursor:pointer;font-size:14px}
+  .btn-save:hover{background:rgba(56,189,248,.2)}
+  .game-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+  .game-header h2{margin:0;font-size:18px}
+  .game-info{display:flex;gap:16px;font-size:14px;color:var(--muted)}
+  .game-info strong{color:var(--text)}
+  .game-tabs{display:flex;gap:6px;margin-bottom:12px}
+  .tab{flex:1;padding:8px 10px;background:rgba(15,23,42,.5);border:1px solid rgba(148,163,184,.15);border-radius:10px;color:var(--muted);font-weight:600;cursor:pointer;font-size:14px;transition:.15s}
+  .tab.active{background:rgba(56,189,248,.15);border-color:rgba(56,189,248,.35);color:var(--accent)}
+  .game-area{position:relative;width:100%;height:260px;background:#0b1220;border-radius:14px;overflow:hidden;border:1px solid rgba(148,163,184,.12);touch-action:none}
+  .square{position:absolute;width:48px;height:48px;background:var(--accent);border-radius:12px;box-shadow:0 0 24px rgba(56,189,248,.45),inset 0 -3px 0 rgba(0,0,0,.25);cursor:pointer;animation:pop .12s ease-out;user-select:none}
+  @keyframes pop{from{transform:scale(.6);opacity:0}to{transform:scale(1);opacity:1}}
+  .mem-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:8px;height:100%}
+  .mem-card{aspect-ratio:1;background:#0b1220;border:1px solid rgba(148,163,184,.2);border-radius:10px;font-size:26px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:.15s}
+  .mem-card.open{background:rgba(56,189,248,.2);border-color:rgba(56,189,248,.4)}
+  .num-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;padding:8px;height:100%}
+  .num-btn{background:#0b1220;border:1px solid rgba(148,163,184,.2);border-radius:8px;color:var(--text);font-weight:700;font-size:16px;cursor:pointer}
+  .num-btn:disabled{opacity:.3}
+  .disclaimer{font-size:13px;line-height:1.6;color:var(--muted)}
+  .disclaimer a{color:var(--accent);text-decoration:none}
+  .footer{display:flex;gap:12px;justify-content:center;margin-top:22px;flex-wrap:wrap}
+  .ghost-sm{background:none;border:none;color:var(--muted);font-size:13px;cursor:pointer;padding:6px 10px;border-radius:8px}
+  .ghost-sm:hover{color:var(--text);background:rgba(148,163,184,.08)}
+  .modal-backdrop{position:fixed;inset:0;background:rgba(2,6,23,.85);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;z-index:200;padding:20px}
+  .modal-backdrop[hidden],.walk-overlay[hidden]{display:none!important}
+  .modal{background:var(--card);border:1px solid rgba(148,163,184,.15);border-radius:20px;width:100%;max-width:420px;box-shadow:0 20px 60px rgba(0,0,0,.5);animation:modalIn .18s ease-out}
+  @keyframes modalIn{from{transform:translateY(12px);opacity:0}to{transform:translateY(0);opacity:1}}
+  .modal-header{display:flex;justify-content:space-between;align-items:center;padding:16px 18px;border-bottom:1px solid rgba(148,163,184,.1)}
+  .modal-header h3{margin:0;font-size:18px}
+  .icon-btn{background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;padding:4px 8px;border-radius:8px}
+  .icon-btn:hover{background:rgba(148,163,184,.1);color:var(--text)}
+  .modal-body{padding:16px;display:flex;flex-direction:column;gap:12px}
+  .emergency-action{width:100%;text-align:left;background:rgba(15,23,42,.6);border:1px solid rgba(148,163,184,.15);border-radius:14px;padding:14px 16px;cursor:pointer;color:var(--text);transition:background .15s,transform .08s}
+  .emergency-action:hover{background:rgba(15,23,42,.9)}
+  .ea-title{display:block;font-weight:700;font-size:16px}
+  .ea-sub{display:block;font-size:13px;color:var(--muted);margin-top:2px}
+  .blocker-links{display:flex;gap:8px;flex-wrap:wrap;padding:0 4px}
+  .link-chip{background:rgba(56,189,248,.12);border:1px solid rgba(56,189,248,.3);color:var(--accent);padding:8px 12px;border-radius:10px;font-size:14px;text-decoration:none;font-weight:600}
+  .timer-panel{text-align:center;padding:18px;background:rgba(0,0,0,.25);border-radius:14px;border:1px solid rgba(148,163,184,.12)}
+  .breathing-circle{width:120px;height:120px;margin:0 auto 16px;border-radius:50%;background:radial-gradient(circle at 30% 30%,#38bdf8,#0ea5e9);box-shadow:0 0 40px rgba(56,189,248,.4),inset 0 0 20px rgba(255,255,255,.2);transition:transform 4s ease-in-out;transform:scale(1)}
+  .timer-display{font-size:44px;font-weight:800;letter-spacing:.02em}
+  .breath-text{color:var(--muted);margin-top:4px;font-size:15px;min-height:20px}
+  .walk-overlay{position:fixed;inset:0;background:var(--bg);z-index:300;display:flex;align-items:center;justify-content:center;text-align:center;padding:30px}
+  .walk-content h2{font-size:36px;margin:0 0 12px}
+  .walk-content p{font-size:20px;margin:6px 0;color:var(--text)}
+  .walk-sub{color:var(--muted)!important;font-size:15px!important;margin-top:16px!important}
+  .lock-screen{position:fixed;inset:0;background:var(--bg);z-index:500;display:flex;align-items:center;justify-content:center;padding:20px}
+  .lock-screen[hidden]{display:none!important}
+  .lock-content{width:100%;max-width:340px;text-align:center}
+  .lock-content h1{margin:0 0 6px;font-size:34px;font-weight:800}
+  .lock-sub{color:var(--muted);margin:0 0 24px;font-size:15px}
+  .pin-dots{display:flex;gap:16px;justify-content:center;margin-bottom:10px}
+  .pin-dots span{width:16px;height:16px;border-radius:50%;border:2px solid rgba(148,163,184,.3);transition:all .15s}
+  .pin-dots span.filled{background:var(--accent);border-color:var(--accent);box-shadow:0 0 12px rgba(56,189,248,.5)}
+  .pin-preview{height:26px;font-size:22px;font-weight:700;color:var(--accent);text-align:center;opacity:0;transition:opacity .15s;letter-spacing:.18em;margin-bottom:4px}
+  .pin-preview.show{opacity:1}
+  .keypad{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+  .key{aspect-ratio:1;background:var(--card);border:1px solid rgba(148,163,184,.15);border-radius:20px;font-size:28px;font-weight:600;color:var(--text);cursor:pointer;transition:transform .08s,background .15s;user-select:none;box-shadow:0 4px 12px rgba(0,0,0,.2)}
+  .key:active{transform:scale(.94);background:rgba(148,163,184,.12)}
+  .pin-input{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.2);border-radius:12px;padding:14px;font-size:20px;text-align:center;letter-spacing:.35em;color:var(--text);margin-bottom:10px}
+  .mini-input{flex:1;background:#0b1220;border:1px solid rgba(148,163,184,.15);border-radius:10px;color:var(--text);padding:10px;font-size:14px}
+  #toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(140%);background:#0b1220;color:white;padding:12px 18px;border-radius:12px;border:1px solid rgba(56,189,248,.35);box-shadow:0 12px 30px rgba(0,0,0,.45);font-weight:600;font-size:14px;transition:transform .28s cubic-bezier(.2,.8,.2,1);z-index:99;max-width:92%;text-align:center}
+  #toast.show{transform:translateX(-50%) translateY(0)} #toast.undo-active{border-color:rgba(34,197,94,.6);cursor:pointer}
+  @keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-10px)}40%{transform:translateX(10px)}60%{transform:translateX(-7px)}80%{transform:translateX(7px)}}
+  .lock-content.shake{animation:shake .45s ease}
+  .pin-dots.flash span{border-color:#ef4444!important;background:#ef4444!important;box-shadow:0 0 14px rgba(239,68,68,.7)}
+  @media (max-width:480px){.streak-number{font-size:64px}.game-area{height:220px}}
 </style>
 </head>
 <body>
-<div class="container">
-  <h1>CleanDays</h1>
-  <p>Current Streak</p>
-  <div class="streak" id="streak">0</div>
-  <p>days</p>
+<main class="container">
+  <header>
+    <h1>CleanDays <span>v2.5</span></h1>
+    <p class="subtitle" id="subtitle">Dein täglicher Streak-Tracker</p>
+  </header>
 
-  <button class="btn btn-success" onclick="successDay()">I made it today</button>
-  <button class="btn btn-danger" onclick="resetStreak()">Reset</button>
-  <button class="btn btn-ghost" onclick="toggleGame()">Urge Hit? Play Game</button>
+  <section class="card streak-card">
+    <div class="streak-number" id="streak">0</div>
+    <div class="streak-label" id="streak-label">Tage in Folge</div>
+    <div class="best" id="best">Best: 0</div>
+  </section>
 
-  <div class="tipp-box" id="tipp"></div>
-  <button class="btn btn-ghost" onclick="newTipp()">New Tip</button>
+  <section class="stats-row">
+    <div class="stat"><span id="todayLabel">Heute:</span> <span id="todayStatus">✗</span></div>
+    <div class="stat"><span id="lastLabel">Letzter Check:</span> <span id="lastCheck">–</span></div>
+  </section>
 
-  <div class="game-box" id="gameBox">
-    <h3>Quick Distraction Game</h3>
-    <p>Tap the blue squares as fast as you can for 60s</p>
-    <div class="score" id="score">Score: 0</div>
-    <div id="gameArea" style="height:200px; position:relative; background:#0f172a; border-radius:8px;"></div>
-    <button class="btn btn-ghost" onclick="startGame()">Start 60s Game</button>
+  <section class="actions">
+    <button id="successBtn" class="btn btn-success">Ich hab's geschafft</button>
+    <div class="btn-row">
+      <button id="emergencyBtn" class="btn btn-ghost btn-emergency">Notfall</button>
+      <button id="resetBtn" class="btn btn-ghost btn-danger">Reset</button>
+      <button id="gameBtn" class="btn btn-ghost btn-accent">Urge? Spiel</button>
+    </div>
+  </section>
+
+  <section class="card tip-card" id="tipCard">
+    <h2 id="tipTitle">Tipp für heute</h2>
+    <p id="tipText"></p>
+    <button id="nextTip" class="link-btn">Nächster Tipp →</button>
+  </section>
+
+  <section class="card diary-card">
+    <div class="diary-header" id="diaryHeader">
+      <h2><span id="diaryTitle">Tagebuch</span> <span id="diaryDot" class="diary-dot" hidden></span></h2>
+      <button id="diaryToggle" class="icon-btn">▼</button>
+    </div>
+    <div id="diaryBody" class="diary-body" hidden>
+      <textarea id="diaryText" maxlength="500" rows="4" placeholder="Heute war schwierig weil... oder was hat geholfen?"></textarea>
+      <div class="diary-footer">
+        <span id="diaryCounter" class="diary-counter">0/500</span>
+        <button id="diarySave" class="btn-save">Speichern</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="card game-card" id="gameCard" hidden>
+    <div class="game-header">
+      <h2 id="gameTitle">Urge Spiele</h2>
+      <div class="game-info">
+        <span><span id="timeLabel">Zeit:</span> <strong id="timeLeft">60</strong>s</span>
+        <span><span id="scoreLabel">Score:</span> <strong id="score">0</strong></span>
+      </div>
+    </div>
+    <div class="game-tabs" id="gameTabs">
+      <button class="tab active" data-game="surf" id="tabSurf">Surf</button>
+      <button class="tab" data-game="memory" id="tabMemory">Memory</button>
+      <button class="tab" data-game="numbers" id="tabNumbers">Zahlen</button>
+      <button class="tab" data-game="breathe" id="tabBreathe">Atem</button>
+    </div>
+    <div id="gameArea" class="game-area"></div>
+    <div id="gameBest" style="margin-top:8px;font-size:13px;color:var(--muted);text-align:center"></div>
+    <button id="stopGame" class="btn btn-ghost" style="margin-top:12px">Spiel beenden</button>
+  </section>
+
+  <section class="card" id="blockerCard">
+    <h2 id="blockerTitle" style="margin:0 0 8px;font-size:15px;color:var(--muted);font-weight:600">Blocker</h2>
+    <p class="disclaimer" id="blockerDesc">Browser können andere Apps/Tabs nicht sperren. Dieser Blocker wirkt in CleanDays. Du kannst die Liste mit einem Klick für BlockSite/Cold Turkey exportieren.</p>
+    <textarea id="blocklistInput" class="blocklist" style="min-height:110px;margin-top:10px"></textarea>
+    <div class="btn-row" style="margin-top:10px">
+      <button id="blockerToggle" class="btn btn-ghost btn-accent" style="flex:1.3"></button>
+      <button id="blocklistSave" class="btn-save" style="flex:1"></button>
+      <button id="blocklistExport" class="btn btn-ghost" style="flex:1"></button>
+    </div>
+    <div style="margin-top:14px">
+      <label id="miniLabel" style="font-size:13px;color:var(--muted)">Mini-Browser testen:</label>
+      <div style="display:flex;gap:8px;margin-top:6px">
+        <input id="miniUrl" class="mini-input" type="text" placeholder="example.com">
+        <button id="miniGo" class="btn-save">Go</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="card disclaimer">
+    <p id="disclaimText"><strong>Hinweis:</strong> Diese App ersetzt keine Therapie oder medizinische Beratung. Bei starkem Leidensdruck oder Suchtverhalten hole dir professionelle Hilfe.</p>
+    <p id="helpText">TelefonSeelsorge: <a href="tel:116123">116 123</a> (24/7, kostenlos) · <a href="tel:08001110111">0800 111 0 111</a></p>
+  </section>
+
+  <footer class="footer">
+    <button id="langToggle" class="ghost-sm">DE | EN</button>
+    <button id="exportBtn" class="ghost-sm">Export</button>
+    <button id="importBtn" class="ghost-sm">Import</button>
+    <button id="pinBtn" class="ghost-sm">PIN ändern</button>
+    <input type="file" id="importFile" accept=".json" hidden>
+  </footer>
+
+  <div id="toast" role="status" aria-live="polite"></div>
+</main>
+
+<div id="emergencyModal" class="modal-backdrop" hidden>
+  <div class="modal" role="dialog" aria-modal="true">
+    <div class="modal-header">
+      <h3 id="emergencyTitle">Notfall – Du schaffst das</h3>
+      <button id="emergencyClose" class="icon-btn">✕</button>
+    </div>
+    <div class="modal-body">
+      <button class="emergency-action" id="actionBlocker"><span class="ea-title">🛡️ Blocker öffnen</span><span class="ea-sub">Websites sofort sperren</span></button>
+      <div id="blockerLinks" class="blocker-links" hidden>
+        <a href="https://www.blocksite.co/" target="_blank" rel="noopener" class="link-chip">BlockSite</a>
+        <a href="https://getcoldturkey.com" target="_blank" rel="noopener" class="link-chip">Cold Turkey</a>
+      </div>
+      <button class="emergency-action" id="actionTimer"><span class="ea-title">🧘 10 Min Timer starten</span><span class="ea-sub">Mit Atem-Anleitung (4-7-8)</span></button>
+      <div id="timerPanel" class="timer-panel" hidden>
+        <div class="breathing-circle" id="breathCircle"></div>
+        <div class="timer-display" id="timerDisplay">10:00</div>
+        <div class="breath-text" id="breathText">Bereit?</div>
+        <button id="timerStop" class="btn btn-ghost" style="margin-top:14px">Stop</button>
+      </div>
+      <button class="emergency-action" id="actionWalk"><span class="ea-title">🚶 Rausgehen</span><span class="ea-sub">10 Minuten ohne Handy</span></button>
+    </div>
   </div>
+</div>
 
-  <p class="disclaimer">
-    <strong>Disclaimer:</strong> This app is for tracking and motivation only.
-    It does not guarantee recovery or cure. If you struggle with compulsive behavior
-    or feel overwhelmed, please consider reaching out to a licensed psychologist,
-    counselor, or trusted support service in your country.
-  </p>
+<div id="walkOverlay" class="walk-overlay" hidden>
+  <div class="walk-content">
+    <h2 id="walkTitle">Leg Handy weg.</h2>
+    <p id="walkText">10 Minuten spazieren.</p>
+    <p id="walkSub" class="walk-sub">Atme tief durch. Komm zurück, wenn du bereit bist.</p>
+    <button id="walkDone" class="btn btn-success">Ich bin zurück</button>
+  </div>
+</div>
+
+<div id="pinSetupModal" class="modal-backdrop" hidden>
+  <div class="modal">
+    <div class="modal-header"><h3 id="pinSetupTitle">PIN festlegen</h3></div>
+    <div class="modal-body">
+      <p id="pinDesc" style="color:var(--muted);margin:0 0 8px;font-size:14px">4- oder 6-stellig, schützt deine Daten lokal auf diesem Gerät.</p>
+      <div style="display:flex;gap:8px;margin-bottom:10px">
+        <button type="button" id="len4" class="tab active" style="flex:1">4-stellig</button>
+        <button type="button" id="len6" class="tab" style="flex:1">6-stellig</button>
+      </div>
+      <input id="pinInput1" class="pin-input" type="password" inputmode="numeric" maxlength="4" placeholder="••••">
+      <input id="pinInput2" class="pin-input" type="password" inputmode="numeric" maxlength="4" placeholder="Wiederholen">
+      <button id="pinSaveBtn" class="btn btn-success">Speichern</button>
+      <button id="pinSkipBtn" class="btn btn-ghost" style="margin-top:8px">Später</button>
+    </div>
+  </div>
+</div>
+
+<div id="lockScreen" class="lock-screen" hidden>
+  <div class="lock-content">
+    <h1>CleanDays</h1>
+    <p class="lock-sub" id="pinSub">PIN eingeben</p>
+    <div class="pin-dots" id="pinDots"></div>
+    <div id="pinPreview" class="pin-preview"></div>
+    <div style="display:flex;justify-content:center;gap:12px;margin-bottom:8px">
+      <button id="togglePeek" class="icon-btn" title="Anzeigen" style="font-size:20px">👁️</button>
+    </div>
+    <div id="lockoutInfo" style="color:#fca5a5;font-weight:600;margin-bottom:10px;min-height:20px" hidden></div>
+    <div class="keypad" id="keypad">
+      <button class="key" data-num="1">1</button><button class="key" data-num="2">2</button><button class="key" data-num="3">3</button>
+      <button class="key" data-num="4">4</button><button class="key" data-num="5">5</button><button class="key" data-num="6">6</button>
+      <button class="key" data-num="7">7</button><button class="key" data-num="8">8</button><button class="key" data-num="9">9</button>
+      <button class="key" style="visibility:hidden"></button><button class="key" data-num="0">0</button><button class="key delete" data-del="1">⌫</button>
+    </div>
+    <button id="bioBtn" class="btn btn-ghost btn-accent" style="margin-top:14px" hidden>Mit Face ID / Geräte-PIN entsperren</button>
+    <button id="forgotPin" class="link-btn" style="margin-top:18px;color:var(--muted)">PIN vergessen?</button>
+  </div>
+</div>
+
+<div id="wipeModal" class="modal-backdrop" hidden>
+  <div class="modal">
+    <div class="modal-header"><h3 id="wipeTitle">Daten löschen?</h3></div>
+    <div class="modal-body">
+      <p id="wipeDesc" style="color:var(--muted);margin:0 0 8px;font-size:14px">Tippe "LÖSCHEN" um alle Daten endgültig zu löschen.</p>
+      <input id="wipeInput" class="pin-input" type="text" placeholder="LÖSCHEN" style="letter-spacing:.1em;text-align:center;text-transform:uppercase">
+      <button id="wipeConfirm" class="btn btn-danger" style="background:linear-gradient(180deg,#ef4444,#dc2626);color:white;margin-top:8px">Endgültig löschen</button>
+      <button id="wipeCancel" class="btn btn-ghost" style="margin-top:8px">Abbrechen</button>
+    </div>
+  </div>
 </div>
 
 <script>
-// Data
-const tipps = [
-  "Urges come in 5min waves. Set a timer and wait it out.",
-  "Delete Instagram/TikTok for 24h if it gets bad.",
-  "Go outside for 10min. No phone. Just walk.",
-  "Day 0 is better than day -1. Start again tomorrow.",
-  "Drink 500ml water. Often it's just thirst/restlessness.",
-  "Do 20 pushups. Get the adrenaline out.",
-  "Block porn sites with Cold Turkey or BlockSite.",
-  "Avoid boredom. Plan your evenings.",
-  "Sleep 8h. Tiredness triggers relapses."
-];
-
-let streak = parseInt(localStorage.getItem('streak') || '0');
-let lastDate = localStorage.getItem('lastDate') || '';
-let shownTipps = JSON.parse(localStorage.getItem('shownTipps') || '[]');
-
-document.getElementById('streak').innerText = streak;
-newTipp();
-
-// Core functions
-function successDay() {
-  const today = new Date().toDateString();
-  if (lastDate === today) {
-    alert("You already checked in today!");
-    return;
-  }
-  streak++;
-  lastDate = today;
-  saveData();
-  document.getElementById('streak').innerText = streak;
-}
-
-function resetStreak() {
-  if (confirm("Reset your streak?")) {
-    streak = 0;
-    lastDate = '';
-    saveData();
-    document.getElementById('streak').innerText = streak;
-  }
-}
-
-function saveData() {
-  localStorage.setItem('streak', streak);
-  localStorage.setItem('lastDate', lastDate);
-}
-
-function newTipp() {
-  let availableTipps = tipps.filter((_, i) =>!shownTipps.includes(i));
-  if (availableTipps.length === 0) {
-    shownTipps = [];
-    availableTipps = tipps;
-  }
-  const randomIndex = Math.floor(Math.random() * availableTipps.length);
-  const tippIndex = tipps.indexOf(availableTipps[randomIndex]);
-  shownTipps.push(tippIndex);
-  document.getElementById('tipp').innerText = tipps[tippIndex];
-  localStorage.setItem('shownTipps', JSON.stringify(shownTipps));
-}
-
-// Mini Game: Tap the target
-let gameRunning = false;
-let score = 0;
-let gameTimer;
-
-function toggleGame() {
-  const box = document.getElementById('gameBox');
-  box.style.display = box.style.display === 'block'? 'none' : 'block';
-}
-
-function startGame() {
-  if (gameRunning) return;
-  gameRunning = true;
-  score = 0;
-  document.getElementById('score').innerText = 'Score: 0';
-
-  let timeLeft = 60;
-  spawnTarget();
-
-  gameTimer = setInterval(() => {
-    timeLeft--;
-    if (timeLeft <= 0) {
-      clearInterval(gameTimer);
-      gameRunning = false;
-      alert("Time's up! Score: " + score + ". You made it through the urge!");
+(() => {
+  const DEFAULT_BLOCKS = ['pornhub.com','xvideos.com','xhamster.com','xnxx.com','youporn.com','redtube.com','tiktok.com','instagram.com','x.com','reddit.com'];
+  const TIPS = {
+    de: [
+      "Erkenne deinen Trigger – notiere Auslöser und meide sie heute bewusst.",
+      "Mach 20 Liegestütze oder eine 2-Minuten kalte Dusche. Dein Körper resettet den Drang.",
+      "Atme 4-7-8: 4s ein, 7s halten, 8s aus. Wiederhole 4 Mal.",
+      "Geh 10 Minuten raus an die frische Luft. Licht und Bewegung schwächen den Urge.",
+      "Leg das Handy weg. Aktiviere einen Blocker und verlasse den Raum für 5 Minuten.",
+      "Ruf einen Freund an oder schreib jemandem. Verbindung schlägt Scham.",
+      "Trink ein großes Glas Wasser und iss etwas Proteinreiches. Hunger verstärkt Cravings.",
+      "Lies dein WARUM laut vor – deine 3 wichtigsten Gründe für clean zu bleiben.",
+      "Ein Urge ist wie eine Welle: steigt, peakt, fällt nach 15–20 Min. Surfe ihn, bekämpfe ihn nicht."
+    ],
+    en: [
+      "Recognize your trigger – note what sets you off and avoid it today.",
+      "Do 20 push-ups or take a 2-minute cold shower. Your body resets the urge.",
+      "Breathe 4-7-8: 4s in, 7s hold, 8s out. Repeat 4 times.",
+      "Go outside for 10 minutes. Light and movement weaken the urge.",
+      "Put your phone away. Turn on a blocker and leave the room for 5 minutes.",
+      "Call a friend or text someone. Connection beats shame.",
+      "Drink a big glass of water and eat some protein. Hunger amplifies cravings.",
+      "Read your WHY out loud – your top 3 reasons to stay clean.",
+      "An urge is like a wave: it rises, peaks, and falls after 15–20 min. Surf it, don't fight it."
+    ]
+  };
+  const L = {
+    de: {
+      subtitle:"Dein täglicher Streak-Tracker",days:"Tage in Folge",best:"Best:",today:"Heute:",lastCheck:"Letzter Check:",
+      success:"Ich hab's geschafft",emergency:"Notfall",reset:"Reset",resetHold:"Halten...",game:"Urge? Spiel",
+      tipTitle:"Tipp für heute",nextTip:"Nächster Tipp →",diary:"Tagebuch",diaryPh:"Heute war schwierig weil... oder was hat geholfen?",save:"Speichern",
+      gameTitle:"Urge Spiele",time:"Zeit:",score:"Score:",moves:"Züge:",next:"Nächste:",endGame:"Spiel beenden",
+      surf:"Surf",memory:"Memory",numbers:"Zahlen",breathe:"Atem",
+      blockerTitle:"Blocker",blockerDesc:"Browser können andere Apps/Tabs nicht sperren. Dieser Blocker wirkt in CleanDays. Du kannst die Liste mit einem Klick für BlockSite/Cold Turkey exportieren.",
+      blockerOn:"Sperrmodus aktiv",blockerOff:"Sperrmodus inaktiv",blocklistSave:"Liste speichern",exportTxt:"Export .txt",miniTest:"Mini-Browser testen:",go:"Go",
+      disclaimer:"<strong>Hinweis:</strong> Diese App ersetzt keine Therapie oder medizinische Beratung. Bei starkem Leidensdruck oder Suchtverhalten hole dir professionelle Hilfe.",
+      helpline:'TelefonSeelsorge: <a href="tel:116123">116 123</a> (24/7, kostenlos) · <a href="tel:08001110111">0800 111 0 111</a>',
+      export:"Export",import:"Import",pinChange:"PIN ändern",
+      emergencyTitle:"Notfall – Du schaffst das",blockerOpen:"🛡️ Blocker öffnen",blockerSub:"Websites sofort sperren",
+      timerStart:"🧘 10 Min Timer starten",timerSub:"Mit Atem-Anleitung (4-7-8)",walkStart:"🚶 Rausgehen",walkSub:"10 Minuten ohne Handy",
+      stop:"Stop",walkTitle:"Leg Handy weg.",walkText:"10 Minuten spazieren.",walkHint:"Atme tief durch. Komm zurück, wenn du bereit bist.",walkBack:"Ich bin zurück",
+      pinSet:"PIN festlegen",pinDesc:"4- oder 6-stellig, schützt deine Daten lokal auf diesem Gerät.",pinSave:"Speichern",pinLater:"Später",
+      pinEnter:"PIN eingeben",pinForgot:"PIN vergessen?",
+      toastDone:"Für heute schon eingetragen ✓",toastStreak:"Stark! Tag",toastReset:"Streak zurückgesetzt – Tippe zum Rückgängig",
+      toastHold:"Halten zum Zurücksetzen",toastDiary:"Tagebuch gespeichert",toastGameEnd:"Spiel beendet –",
+      toastReminder:"Noch einchecken? Dein Streak wartet.",toastBackup:"Backup exportiert",toastImportOk:"Import erfolgreich",
+      toastImportFail:"Import fehlgeschlagen",toastPinSaved:"PIN gespeichert",toastTimerDone:"10 Minuten geschafft – stark!",
+      toastTimerStop:"Timer gestoppt",toastWelcome:"Willkommen zurück – gut gemacht!",toastBlockSaved:"Blockliste gespeichert",
+      toastBlockOn:"Blocker aktiviert",toastBlockOff:"Blocker deaktiviert",toastBlocked:"Blockiert – Stopp! Atme durch.",toastOpened:"Geöffnet in neuem Tab",
+      toastPin4:"PIN muss 4 Ziffern haben",toastPinNoMatch:"PINs stimmen nicht überein",labelBest:"Best",undo:"Rückgängig gemacht ✓",
+      pinLength4:"4-stellig",pinLength6:"6-stellig",biometric:"Mit Face ID / Geräte-PIN entsperren",lockout:"Zu viele Versuche",wrongPin:"Falsch",peekShow:"Anzeigen",peekHide:"Verbergen",deleteTitle:"Daten löschen?",deleteDesc:"Tippe 'LÖSCHEN' um alle Daten endgültig zu löschen.",deleteConfirm:"Endgültig löschen",cancel:"Abbrechen",pinDescLong:"4- oder 6-stellig, schützt deine Daten lokal auf diesem Gerät.",pinNeed:"-stellig erforderlich"
+    },
+    en: {
+      subtitle:"Your daily streak tracker",days:"Days in a row",best:"Best:",today:"Today:",lastCheck:"Last check:",
+      success:"I made it",emergency:"Emergency",reset:"Reset",resetHold:"Hold...",game:"Urge? Play",
+      tipTitle:"Tip for today",nextTip:"Next tip →",diary:"Journal",diaryPh:"Today was hard because... or what helped?",save:"Save",
+      gameTitle:"Urge Games",time:"Time:",score:"Score:",moves:"Moves:",next:"Next:",endGame:"End game",
+      surf:"Surf",memory:"Memory",numbers:"Numbers",breathe:"Breathe",
+      blockerTitle:"Blocker",blockerDesc:"Browsers can't block other tabs/apps. This blocker works inside CleanDays. Export the list with one click for BlockSite/Cold Turkey.",
+      blockerOn:"Block mode ON",blockerOff:"Block mode OFF",blocklistSave:"Save list",exportTxt:"Export .txt",miniTest:"Test mini-browser:",go:"Go",
+      disclaimer:"<strong>Note:</strong> This app is not a substitute for therapy or medical advice. If you're struggling, seek professional help.",
+      helpline:'Support: <a href="https://findahelpline.org" target="_blank">findahelpline.org</a> · US: <a href="tel:988">988</a>',
+      export:"Export",import:"Import",pinChange:"Change PIN",
+      emergencyTitle:"Emergency – You've got this",blockerOpen:"🛡️ Open blocker",blockerSub:"Block sites now",
+      timerStart:"🧘 Start 10 min timer",timerSub:"With breathing guide (4-7-8)",walkStart:"🚶 Go outside",walkSub:"10 minutes without phone",
+      stop:"Stop",walkTitle:"Put your phone away.",walkText:"Walk for 10 minutes.",walkHint:"Breathe deeply. Come back when ready.",walkBack:"I'm back",
+      pinSet:"Set PIN",pinDesc:"4 or 6 digits, protects your data locally on this device.",pinSave:"Save",pinLater:"Later",
+      pinEnter:"Enter PIN",pinForgot:"Forgot PIN?",
+      toastDone:"Already logged for today ✓",toastStreak:"Strong! Day",toastReset:"Streak reset – Tap to undo",
+      toastHold:"Hold to reset",toastDiary:"Journal saved",toastGameEnd:"Game over –",
+      toastReminder:"Check in? Your streak is waiting.",toastBackup:"Backup exported",toastImportOk:"Import successful",
+      toastImportFail:"Import failed",toastPinSaved:"PIN saved",toastTimerDone:"10 minutes done – strong!",
+      toastTimerStop:"Timer stopped",toastWelcome:"Welcome back – well done!",toastBlockSaved:"Blocklist saved",
+      toastBlockOn:"Blocker activated",toastBlockOff:"Blocker deactivated",toastBlocked:"Blocked – Stop! Breathe.",toastOpened:"Opened in new tab",
+      toastPin4:"PIN must be 4 digits",toastPinNoMatch:"PINs don't match",labelBest:"Best",undo:"Undone ✓",
+      pinLength4:"4-digit",pinLength6:"6-digit",biometric:"Unlock with Face ID / Device PIN",lockout:"Too many attempts",wrongPin:"Wrong",peekShow:"Show",peekHide:"Hide",deleteTitle:"Delete data?",deleteDesc:"Type 'DELETE' to permanently erase all data.",deleteConfirm:"Delete permanently",cancel:"Cancel",pinDescLong:"4 or 6 digits, protects your data locally on this device.",pinNeed:" digits required"
     }
-  }, 1000);
-}
-
-function spawnTarget() {
-  if (!gameRunning) return;
-  const area = document.getElementById('gameArea');
-  area.innerHTML = '';
-
-  const target = document.createElement('div');
-  target.style.width = '50px';
-  target.style.height = '50px';
-  target.style.background = '#38bdf8';
-  target.style.borderRadius = '8px';
-  target.style.position = 'absolute';
-  target.style.left = Math.random() * (area.offsetWidth - 50) + 'px';
-  target.style.top = Math.random() * (area.offsetHeight - 50) + 'px';
-  target.style.cursor = 'pointer';
-
-  target.onclick = () => {
-    score++;
-    document.getElementById('score').innerText = 'Score: ' + score;
-    spawnTarget();
   };
 
-  area.appendChild(target);
-  setTimeout(spawnTarget, 1200);
-}
+  const STORAGE_KEY='cleandays_v25';
+  let data={streak:0,lastDate:null,bestStreak:0,tipsShown:[],lastReminderDate:null,_lastSeen:null,diary:{},pinHash:null,pinLength:4,lang:'de',gameBests:{surf:0,memory:0,numbers:0,breathe:0},blocklist:DEFAULT_BLOCKS,blockerActive:false,webauthnId:null,webauthnRaw:null};
+  let undoData=null, undoTimeout=null;
+  const tt = k => L[data.lang][k] || k;
+
+  // DOM
+  const streakEl=document.getElementById('streak'), bestEl=document.getElementById('best'), todayStatusEl=document.getElementById('todayStatus'), lastCheckEl=document.getElementById('lastCheck');
+  const successBtn=document.getElementById('successBtn'), resetBtn=document.getElementById('resetBtn'), gameBtn=document.getElementById('gameBtn'), emergencyBtn=document.getElementById('emergencyBtn');
+  const tipText=document.getElementById('tipText'), nextTipBtn=document.getElementById('nextTip');
+  const gameCard=document.getElementById('gameCard'), gameArea=document.getElementById('gameArea'), timeLeftEl=document.getElementById('timeLeft'), scoreEl=document.getElementById('score'), stopGameBtn=document.getElementById('stopGame'), gameTabs=document.getElementById('gameTabs'), gameBestEl=document.getElementById('gameBest');
+  const exportBtn=document.getElementById('exportBtn'), importBtn=document.getElementById('importBtn'), importFile=document.getElementById('importFile'), toast=document.getElementById('toast'), pinBtn=document.getElementById('pinBtn'), langToggle=document.getElementById('langToggle');
+  const emergencyModal=document.getElementById('emergencyModal'), emergencyClose=document.getElementById('emergencyClose');
+  const actionBlocker=document.getElementById('actionBlocker'), blockerLinks=document.getElementById('blockerLinks'), actionTimer=document.getElementById('actionTimer'), timerPanel=document.getElementById('timerPanel'), timerDisplay=document.getElementById('timerDisplay'), breathCircle=document.getElementById('breathCircle'), breathText=document.getElementById('breathText'), timerStop=document.getElementById('timerStop'), actionWalk=document.getElementById('actionWalk'), walkOverlay=document.getElementById('walkOverlay'), walkDone=document.getElementById('walkDone');
+  const diaryHeader=document.getElementById('diaryHeader'), diaryToggle=document.getElementById('diaryToggle'), diaryBody=document.getElementById('diaryBody'), diaryText=document.getElementById('diaryText'), diaryCounter=document.getElementById('diaryCounter'), diarySave=document.getElementById('diarySave'), diaryDot=document.getElementById('diaryDot');
+  const lockScreen=document.getElementById('lockScreen'), keypad=document.getElementById('keypad'), forgotPin=document.getElementById('forgotPin');
+  const pinSetupModal=document.getElementById('pinSetupModal'), pinInput1=document.getElementById('pinInput1'), pinInput2=document.getElementById('pinInput2'), pinSaveBtn=document.getElementById('pinSaveBtn'), pinSkipBtn=document.getElementById('pinSkipBtn');
+  const blocklistInput=document.getElementById('blocklistInput'), blockerToggle=document.getElementById('blockerToggle'), blocklistSave=document.getElementById('blocklistSave'), blocklistExport=document.getElementById('blocklistExport'), miniUrl=document.getElementById('miniUrl'), miniGo=document.getElementById('miniGo');
+  const pinDotsContainer=document.getElementById('pinDots'), pinPreview=document.getElementById('pinPreview'), togglePeek=document.getElementById('togglePeek'), lockoutInfo=document.getElementById('lockoutInfo'), bioBtn=document.getElementById('bioBtn'), len4Btn=document.getElementById('len4'), len6Btn=document.getElementById('len6'), wipeModal=document.getElementById('wipeModal'), wipeInput=document.getElementById('wipeInput'), wipeConfirm=document.getElementById('wipeConfirm'), wipeCancel=document.getElementById('wipeCancel'), wipeTitle=document.getElementById('wipeTitle'), wipeDesc=document.getElementById('wipeDesc');
+
+  let wrongAttempts=0, lockoutUntil=0, lockoutTimer=null, selectedPinLen=4, peekEnabled=localStorage.getItem('pin_peek')==='1';
+
+  // utils
+  const fmt = d => {const y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,'0'),day=String(d.getDate()).padStart(2,'0');return `${y}-${m}-${day}`};
+  const getToday=()=>fmt(new Date()), getYesterday=()=>{const d=new Date();d.setDate(d.getDate()-1);return fmt(d);};
+  const buf2b64=buf=>btoa(String.fromCharCode(...new Uint8Array(buf)));
+  const b642buf=b64=>{const bin=atob(b64);const arr=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)arr[i]=bin.charCodeAt(i);return arr.buffer};
+
+  function loadData(){
+    try{
+      const raw=localStorage.getItem(STORAGE_KEY)||localStorage.getItem('cleandays_v24')||localStorage.getItem('cleandays_v23')||localStorage.getItem('cleandays_v22');
+      if(raw){const p=JSON.parse(raw);data={...data,...p}; if(!data.diary)data.diary={}; if(!data.gameBests)data.gameBests={surf:0,memory:0,numbers:0,breathe:0}; if(!data.blocklist)data.blocklist=DEFAULT_BLOCKS; if(!data.lang)data.lang='de'; if(!data.pinLength)data.pinLength=4;}
+    }catch{}
+  }
+  function saveData(){localStorage.setItem(STORAGE_KEY,JSON.stringify(data));}
+
+  function renderPinDots(){pinDotsContainer.innerHTML='';const len=data.pinLength||4;for(let i=0;i<len;i++){const s=document.createElement('span');pinDotsContainer.appendChild(s)}updDots()}
+  function updDots(){const dots=pinDotsContainer.querySelectorAll('span');dots.forEach((d,i)=>d.classList.toggle('filled',i<pinInput.length))}
+  function updatePeekIcon(){togglePeek.textContent=peekEnabled?'🙈':'👁️';togglePeek.title=peekEnabled?tt('peekHide'):tt('peekShow')}
+  function showPinPreview(d){if(!peekEnabled) return;pinPreview.textContent='•'.repeat(Math.max(0,pinInput.length-1))+d;pinPreview.classList.add('show');setTimeout(()=>pinPreview.classList.remove('show'),500)}
+
+  // lang
+  function applyLang(){
+    document.documentElement.lang=data.lang;
+    document.getElementById('subtitle').textContent=tt('subtitle');
+    document.getElementById('streak-label').textContent=tt('days');
+    document.getElementById('todayLabel').textContent=tt('today');
+    document.getElementById('lastLabel').textContent=tt('lastCheck');
+    successBtn.textContent=tt('success'); emergencyBtn.textContent=tt('emergency'); resetBtn.textContent=tt('reset'); gameBtn.textContent=tt('game');
+    document.getElementById('tipTitle').textContent=tt('tipTitle'); nextTipBtn.textContent=tt('nextTip');
+    document.getElementById('diaryTitle').textContent=tt('diary'); diaryText.placeholder=tt('diaryPh'); diarySave.textContent=tt('save');
+    document.getElementById('gameTitle').textContent=tt('gameTitle'); document.getElementById('timeLabel').textContent=tt('time'); document.getElementById('scoreLabel').textContent=tt('score'); stopGameBtn.textContent=tt('endGame');
+    tabSurf.textContent=tt('surf'); tabMemory.textContent=tt('memory'); tabNumbers.textContent=tt('numbers'); tabBreathe.textContent=tt('breathe');
+    document.getElementById('blockerTitle').textContent=tt('blockerTitle'); document.getElementById('blockerDesc').textContent=tt('blockerDesc'); document.getElementById('miniLabel').textContent=tt('miniTest'); miniGo.textContent=tt('go'); blocklistSave.textContent=tt('blocklistSave'); blocklistExport.textContent=tt('exportTxt'); updateBlockerToggle();
+    document.getElementById('disclaimText').innerHTML=tt('disclaimer'); document.getElementById('helpText').innerHTML=tt('helpline');
+    exportBtn.textContent=tt('export'); importBtn.textContent=tt('import'); pinBtn.textContent=tt('pinChange'); langToggle.textContent=data.lang.toUpperCase()+' | '+(data.lang==='de'?'EN':'DE');
+    document.getElementById('emergencyTitle').textContent=tt('emergencyTitle');
+    actionBlocker.querySelector('.ea-title').textContent=tt('blockerOpen'); actionBlocker.querySelector('.ea-sub').textContent=tt('blockerSub');
+    actionTimer.querySelector('.ea-title').textContent=tt('timerStart'); actionTimer.querySelector('.ea-sub').textContent=tt('timerSub');
+    actionWalk.querySelector('.ea-title').textContent=tt('walkStart'); actionWalk.querySelector('.ea-sub').textContent=tt('walkSub');
+    timerStop.textContent=tt('stop'); document.getElementById('walkTitle').textContent=tt('walkTitle'); document.getElementById('walkText').textContent=tt('walkText'); document.getElementById('walkSub').textContent=tt('walkHint'); walkDone.textContent=tt('walkBack');
+    document.getElementById('pinSetupTitle').textContent=tt('pinSet'); document.getElementById('pinDesc').textContent=tt('pinDescLong'); pinSaveBtn.textContent=tt('pinSave'); pinSkipBtn.textContent=tt('pinLater');
+    document.getElementById('pinSub').textContent=tt('pinEnter'); forgotPin.textContent=tt('pinForgot');
+    len4Btn.textContent=tt('pinLength4'); len6Btn.textContent=tt('pinLength6'); bioBtn.textContent=tt('biometric'); wipeTitle.textContent=tt('deleteTitle'); wipeDesc.textContent=tt('deleteDesc'); wipeConfirm.textContent=tt('deleteConfirm'); wipeCancel.textContent=tt('cancel');
+    updatePeekIcon(); updateUI(); updateBestDisplay();
+  }
+
+  function updateUI(){
+    streakEl.textContent=data.streak; bestEl.textContent=`${tt('best')} ${data.bestStreak}`;
+    const today=getToday(), done=data.lastDate===today;
+    todayStatusEl.textContent=done?'✓':'✗'; todayStatusEl.style.color=done?'var(--success)':'var(--muted)';
+    lastCheckEl.textContent=data.lastDate?new Date(data.lastDate).toLocaleDateString(data.lang==='de'?'de-DE':'en-GB',{day:'2-digit',month:'2-digit'}):'–';
+    successBtn.disabled=done; successBtn.style.opacity=done?.7:1;
+  }
+
+  let toastTimer; function showToast(msg){toast.textContent=msg;toast.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>toast.classList.remove('show'),2400);}
+
+  function successDay(){const t=getToday();if(data.lastDate===t){showToast(tt('toastDone'));return;}const y=getYesterday();data.streak=!data.lastDate?1:data.lastDate===y?data.streak+1:1;data.lastDate=t;data.bestStreak=Math.max(data.bestStreak,data.streak);saveData();updateUI();showToast(`${tt('toastStreak')} ${data.streak} ✓`);if(navigator.vibrate)navigator.vibrate(30);}
+  function performReset(){undoData={streak:data.streak,lastDate:data.lastDate};if(undoTimeout)clearTimeout(undoTimeout);data.streak=0;data.lastDate=null;saveData();updateUI();if(navigator.vibrate)navigator.vibrate([50,30,50]);showToast(tt('toastReset'));toast.classList.add('undo-active');toast.style.cursor='pointer';clearTimeout(toastTimer);toastTimer=setTimeout(()=>{toast.classList.remove('show');toast.classList.remove('undo-active');undoData=null},5000);undoTimeout=setTimeout(()=>undoData=null,5000);}
+  let holdTimer=null,holdInt=null,isHolding=false;function startHold(e){e.preventDefault();if(isHolding)return;isHolding=true;resetBtn.classList.add('holding');resetBtn.textContent=tt('resetHold');const s=Date.now();resetBtn.style.setProperty('--hold',0);holdInt=setInterval(()=>{resetBtn.style.setProperty('--hold',Math.min(100,((Date.now()-s)/2000)*100))},16);holdTimer=setTimeout(()=>{clearInterval(holdInt);finishHold(true)},2000)}function cancelHold(){if(!isHolding)return;clearTimeout(holdTimer);clearInterval(holdInt);finishHold(false)}function finishHold(c){isHolding=false;resetBtn.classList.remove('holding');resetBtn.textContent=tt('reset');if(c)performReset();else showToast(tt('toastHold'))}
+
+  function showTip(){const arr=TIPS[data.lang];if(data.tipsShown.length>=arr.length)data.tipsShown=[];const avail=arr.map((_,i)=>i).filter(i=>!data.tipsShown.includes(i));const idx=avail[Math.floor(Math.random()*avail.length)];data.tipsShown.push(idx);tipText.textContent=arr[idx];saveData();}
+
+  function loadDiaryToday(){const t=getToday(),txt=(data.diary&&data.diary[t])||'';diaryText.value=txt;diaryCounter.textContent=`${txt.length}/500`;diaryDot.hidden=!txt;}
+  function toggleDiary(){const h=diaryBody.hidden;diaryBody.hidden=!h;diaryToggle.textContent=h?'▲':'▼';localStorage.setItem('diary_open',h?'1':'0');if(h)setTimeout(()=>diaryText.focus(),80);}
+  function saveDiary(){const t=getToday(),txt=diaryText.value.trim().slice(0,500);if(!data.diary)data.diary={};if(txt)data.diary[t]=txt;else delete data.diary[t];saveData();diaryDot.hidden=!txt;diaryCounter.textContent=`${txt.length}/500`;showToast(tt('toastDiary'));}
+
+  // GAMES
+  let currentGame='surf',gameRunning=false,gameTimer=null,spawnTimer=null,timeLeft=60,score=0,memFirst=null,memSecond=null,memLock=false,memPairs=0,memMoves=0,nextNum=1,numStart=0;
+  function updateGameUI(){timeLeftEl.textContent=timeLeft;scoreEl.textContent=score;}
+  function updateBestDisplay(){const b=data.gameBests[currentGame]||0;let txt='';if(currentGame==='surf')txt=`${tt('labelBest')}: ${b}`;if(currentGame==='memory')txt=`${tt('labelBest')}: ${b?b+' '+tt('moves').toLowerCase():'-'}`;if(currentGame==='numbers')txt=`${tt('labelBest')}: ${b?b+'s':'-'}`;if(currentGame==='breathe')txt=`${tt('labelBest')}: ${b}x`;gameBestEl.textContent=txt;}
+  function resetGameArea(){gameArea.innerHTML='';gameArea.className='game-area';gameArea.removeAttribute('style');}
+  function stopGameCleanup(){gameRunning=false;clearInterval(gameTimer);clearInterval(spawnTimer);gameTimer=null;spawnTimer=null;resetGameArea();gameCard.hidden=true;gameBtn.disabled=false;gameBtn.textContent=tt('game');timeLeft=60;score=0;document.getElementById('timeLabel').textContent=tt('time');document.getElementById('scoreLabel').textContent=tt('score');updateGameUI();}
+
+  function startSurf(){gameRunning=true;gameCard.hidden=false;gameBtn.disabled=true;gameBtn.textContent=tt('game')+'…';resetGameArea();score=0;timeLeft=60;updateGameUI();spawnSquare();spawnTimer=setInterval(spawnSquare,900);gameTimer=setInterval(()=>{timeLeft--;updateGameUI();if(timeLeft<=0)endSurf()},1000);updateBestDisplay();}
+  function spawnSquare(){gameArea.innerHTML='';const sq=document.createElement('div');sq.className='square';const s=48;const mx=Math.max(0,gameArea.clientWidth-s),my=Math.max(0,gameArea.clientHeight-s);sq.style.left=Math.floor(Math.random()*(mx+1))+'px';sq.style.top=Math.floor(Math.random()*(my+1))+'px';sq.addEventListener('pointerdown',e=>{e.preventDefault();if(!gameRunning)return;score++;if(navigator.vibrate)navigator.vibrate(15);updateGameUI();spawnSquare()});gameArea.appendChild(sq);}
+  function endSurf(){stopGameCleanup();if(score>data.gameBests.surf){data.gameBests.surf=score;saveData();}showToast(`${tt('toastGameEnd')} ${score}`);updateBestDisplay();}
+
+  function startMemory(){gameRunning=true;gameCard.hidden=false;gameBtn.disabled=true;resetGameArea();gameArea.innerHTML='<div class="mem-grid" id="memGrid"></div>';const grid=document.getElementById('memGrid');memFirst=memSecond=null;memLock=false;memPairs=0;memMoves=0;score=0;timeLeft=60;document.getElementById('scoreLabel').textContent=tt('moves');updateGameUI();const syms=['🔥','💧','🌿','⭐','⚡','❄️','🌙','☀️'];const cards=[...syms,...syms].sort(()=>Math.random()-0.5);cards.forEach(s=>{const b=document.createElement('button');b.className='mem-card';b.dataset.sym=s;b.textContent='';b.onclick=()=>{if(memLock||b.classList.contains('open')||!gameRunning)return;b.textContent=s;b.classList.add('open');if(!memFirst){memFirst=b;return;}memSecond=b;memMoves++;score=memMoves;updateGameUI();memLock=true;if(memFirst.dataset.sym===memSecond.dataset.sym){memPairs++;memFirst=null;memSecond=null;memLock=false;if(memPairs===8)endMemory(true);}else setTimeout(()=>{memFirst.textContent='';memSecond.textContent='';memFirst.classList.remove('open');memSecond.classList.remove('open');memFirst=memSecond=null;memLock=false},650);};grid.appendChild(b);});gameTimer=setInterval(()=>{timeLeft--;updateGameUI();if(timeLeft<=0)endMemory(false)},1000);updateBestDisplay();}
+  function endMemory(win){clearInterval(gameTimer);gameRunning=false;gameBtn.disabled=false;const best=data.gameBests.memory||999;if(win&&memMoves<best){data.gameBests.memory=memMoves;saveData();}showToast(win?`${tt('toastGameEnd')} ${memMoves} ${tt('moves')}`:`${tt('toastGameEnd')} ${memPairs}/8`);setTimeout(stopGameCleanup,1200);}
+
+  function startNumbers(){gameRunning=true;gameCard.hidden=false;gameBtn.disabled=true;resetGameArea();gameArea.innerHTML='<div class="num-grid" id="numGrid"></div>';const grid=document.getElementById('numGrid');nextNum=1;timeLeft=0;document.getElementById('timeLabel').textContent=tt('time');document.getElementById('scoreLabel').textContent=tt('next');score=nextNum;updateGameUI();const nums=Array.from({length:25},(_,i)=>i+1).sort(()=>Math.random()-0.5);numStart=Date.now();gameTimer=setInterval(()=>{timeLeft=Math.floor((Date.now()-numStart)/1000);updateGameUI()},200);nums.forEach(n=>{const b=document.createElement('button');b.className='num-btn';b.textContent=n;b.onclick=()=>{if(!gameRunning||n!==nextNum)return;b.disabled=true;b.style.opacity='.25';nextNum++;score=nextNum>25?25:nextNum;updateGameUI();if(nextNum>25){endNumbers()}};grid.appendChild(b)});updateBestDisplay();}
+  function endNumbers(){clearInterval(gameTimer);gameRunning=false;const sec=Math.round((Date.now()-numStart)/1000*10)/10;const best=data.gameBests.numbers||999;if(sec<best){data.gameBests.numbers=sec;saveData();}showToast(`${tt('toastGameEnd')} ${sec}s`);gameBtn.disabled=false;setTimeout(stopGameCleanup,1200);}
+
+  function startBreathe(mins=2){gameRunning=true;gameCard.hidden=false;gameBtn.disabled=true;resetGameArea();timeLeft=mins*60;document.getElementById('scoreLabel').textContent='';updateGameUI();gameArea.innerHTML=`<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:12px"><div id="bc" style="width:110px;height:110px;border-radius:50%;background:radial-gradient(circle at 30% 30%,#38bdf8,#0ea5e9);box-shadow:0 0 30px rgba(56,189,248,.4);transition:transform 4s ease-in-out"></div><div id="bt" style="color:var(--muted)"></div></div>`;const c=document.getElementById('bc'),t=document.getElementById('bt');let ph=0;const phases=data.lang==='de'?[{l:'Einatmen',s:4,z:1.25},{l:'Halten',s:7,z:1.25},{l:'Ausatmen',s:8,z:.85}]:[{l:'Breathe in',s:4,z:1.25},{l:'Hold',s:7,z:1.25},{l:'Breathe out',s:8,z:.85}];function step(){if(!gameRunning)return;const p=phases[ph];t.textContent=p.l;c.style.transitionDuration=p.s+'s';c.style.transform=`scale(${p.z})`;setTimeout(()=>{ph=(ph+1)%3;step()},p.s*1000)}step();gameTimer=setInterval(()=>{timeLeft--;updateGameUI();if(timeLeft<=0){endBreathe()}},1000);updateBestDisplay();}
+  function endBreathe(){gameRunning=false;clearInterval(gameTimer);data.gameBests.breathe=(data.gameBests.breathe||0)+1;saveData();showToast(tt('toastTimerDone'));gameBtn.disabled=false;setTimeout(stopGameCleanup,800);}
+
+  function startGame(){if(currentGame==='surf')startSurf();else if(currentGame==='memory')startMemory();else if(currentGame==='numbers')startNumbers();else startBreathe(2);}
+
+  gameTabs.addEventListener('click',e=>{const b=e.target.closest('.tab');if(!b)return;document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));b.classList.add('active');currentGame=b.dataset.game;if(gameRunning)stopGameCleanup();timeLeft=currentGame==='breathe'?120:currentGame==='memory'?60:currentGame==='numbers'?0:60;score=0;updateGameUI();updateBestDisplay();document.getElementById('timeLabel').textContent=tt('time');document.getElementById('scoreLabel').textContent=currentGame==='memory'?tt('moves'):currentGame==='numbers'?tt('next'):tt('score');});
+
+  // reminders
+  let notificationRequested=false;function ensureNotif(){if(!('Notification'in window)||notificationRequested)return;notificationRequested=true;if(Notification.permission==='default')Notification.requestPermission().then(p=>{if(p==='granted')showToast(data.lang==='de'?'Erinnerungen aktiviert':'Reminders on')})}
+  document.addEventListener('click',ensureNotif,{once:true});
+  function sendReminder(){const body=tt('toastReminder');if('Notification'in window&&Notification.permission==='granted'){try{new Notification('CleanDays',{body})}catch{showToast(body)}}else showToast(body);if(navigator.vibrate)navigator.vibrate(40);}
+  let lastSeenDay=getToday();function handleDayChange(prev){if(data.streak>0&&data.lastDate&&data.lastDate<prev){data.streak=0;saveData();updateUI();showToast(data.lang==='de'?'Streak unterbrochen':'Streak broken')}}
+  function minuteCheck(){const n=new Date(),t=getToday();if(t!==lastSeenDay){handleDayChange(lastSeenDay);lastSeenDay=t;data._lastSeen=t;saveData()}if(n.getHours()===21&&n.getMinutes()===0&&data.lastDate!==t&&data.lastReminderDate!==t){data.lastReminderDate=t;saveData();sendReminder()}}
+
+  // emergency
+  function openEmergency(){if(navigator.vibrate)navigator.vibrate([30,20,30]);emergencyModal.hidden=false}function closeEmergency(){emergencyModal.hidden=true;stopBreathTimer()}
+  let breathCountdown=null,breathTimeout=null,breathRun=false,remSec=600,phaseIdx=0;const phases=[{d:'Einatmen',e:'Breathe in',s:4,z:1.25},{d:'Halten',e:'Hold',s:7,z:1.25},{d:'Ausatmen',e:'Breathe out',s:8,z:.85}];function updTimer(){const m=String(Math.floor(remSec/60)).padStart(2,'0'),s=String(remSec%60).padStart(2,'0');timerDisplay.textContent=`${m}:${s}`}function runPhase(){if(!breathRun)return;const p=phases[phaseIdx];breathText.textContent=data.lang==='de'?p.d:p.e;breathCircle.style.transitionDuration=p.s+'s';breathCircle.style.transform=`scale(${p.z})`;breathTimeout=setTimeout(()=>{phaseIdx=(phaseIdx+1)%3;runPhase()},p.s*1000)}function startBreathTimer(){if(breathRun)return;breathRun=true;remSec=600;phaseIdx=0;timerPanel.hidden=false;updTimer();runPhase();breathCountdown=setInterval(()=>{remSec--;updTimer();if(remSec<=0){stopBreathTimer();showToast(tt('toastTimerDone'));closeEmergency()}},1000)}function stopBreathTimer(){breathRun=false;clearInterval(breathCountdown);clearTimeout(breathTimeout);timerPanel.hidden=true;breathCircle.style.transform='scale(1)';breathText.textContent=data.lang==='de'?'Bereit?':'Ready?'}
+
+  // PIN
+  let pinInput='';function clearPin(){pinInput='';updDots()}
+  async function checkPin(){if(Date.now()<lockoutUntil) return;const ok=btoa(pinInput)===data.pinHash;if(ok){wrongAttempts=0;lockScreen.hidden=true;document.body.style.overflow='';showToast(data.lang==='de'?'Entsperrt':'Unlocked');clearPin();}else{wrongAttempts++;if(navigator.vibrate)navigator.vibrate([50,30,50]);const lc=document.querySelector('.lock-content');lc.classList.add('shake');pinDotsContainer.classList.add('flash');setTimeout(()=>{lc.classList.remove('shake');pinDotsContainer.classList.remove('flash')},550);clearPin();if(wrongAttempts>=3){startLockout()}else{showToast(`${tt('wrongPin')} (${wrongAttempts}/3)`)}}}
+  function startLockout(){lockoutUntil=Date.now()+30000;lockoutInfo.hidden=false;const kp=document.getElementById('keypad');kp.style.pointerEvents='none';kp.style.opacity='0.4';updateLockoutCountdown();lockoutTimer=setInterval(updateLockoutCountdown,1000)}
+  function updateLockoutCountdown(){const remaining=Math.max(0,Math.ceil((lockoutUntil-Date.now())/1000));if(remaining<=0){clearInterval(lockoutTimer);lockoutInfo.hidden=true;const kp=document.getElementById('keypad');kp.style.pointerEvents='';kp.style.opacity='';wrongAttempts=0;}else{lockoutInfo.textContent=`${tt('lockout')} – ${remaining}s`}}
+  function showLock(){renderPinDots();lockScreen.hidden=false;document.body.style.overflow='hidden';clearPin();updatePeekIcon();updateBioButton();wrongAttempts=0;lockoutInfo.hidden=true;}
+  function showPinSetup(){pinSetupModal.hidden=false;pinInput1.value='';pinInput2.value='';selectedPinLen=data.pinLength||4;if(selectedPinLen===6){len6Btn.click()}else{len4Btn.click()}}function hidePinSetup(){pinSetupModal.hidden=true}
+  async function registerBiometric(){try{const challenge=crypto.getRandomValues(new Uint8Array(32));const userId=crypto.getRandomValues(new Uint8Array(16));const publicKey={challenge,rp:{name:'CleanDays',id:location.hostname},user:{id:userId,name:'cleandays',displayName:'CleanDays'},pubKeyCredParams:[{type:'public-key',alg:-7},{type:'public-key',alg:-257}],authenticatorSelection:{authenticatorAttachment:'platform',userVerification:'required'},timeout:60000,attestation:'none'};const cred=await navigator.credentials.create({publicKey});if(cred){data.webauthnId=cred.id;data.webauthnRaw=buf2b64(cred.rawId);saveData();showToast(data.lang==='de'?'Biometrie aktiviert':'Biometric enabled');updateBioButton();}}catch(e){}}
+  async function authenticateBiometric(){try{if(!data.webauthnRaw) return false;const challenge=crypto.getRandomValues(new Uint8Array(32));const publicKey={challenge,allowCredentials:[{id:b642buf(data.webauthnRaw),type:'public-key',transports:['internal']}],userVerification:'required',timeout:60000};const assertion=await navigator.credentials.get({publicKey});if(assertion){lockScreen.hidden=true;document.body.style.overflow='';showToast(tt('toastWelcome'));wrongAttempts=0;return true}}catch(e){}return false}
+  function updateBioButton(){if(window.PublicKeyCredential && data.webauthnRaw){PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable().then(av=>{bioBtn.hidden=!av}).catch(()=>bioBtn.hidden=true);}else{bioBtn.hidden=true;}}
+  function initSec(){if(data.pinHash)showLock();else setTimeout(()=>{if(!data.pinHash)showPinSetup()},700)}
+
+  // blocker
+  function updateBlockerToggle(){blockerToggle.textContent=data.blockerActive?tt('blockerOn'):tt('blockerOff');blockerToggle.style.color=data.blockerActive?'#86efac':'var(--muted)';blockerToggle.style.borderColor=data.blockerActive?'rgba(34,197,94,.5)':'rgba(148,163,184,.2)'}
+  function saveBlocklist(){const list=blocklistInput.value.split('\n').map(s=>s.trim().toLowerCase()).filter(Boolean);data.blocklist=[...new Set(list)];saveData();showToast(tt('toastBlockSaved'));registerSW()}
+  function exportBlocklist(){const blob=new Blob([data.blocklist.join('\n')],{type:'text/plain'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='cleandays-blocklist.txt';a.click();URL.revokeObjectURL(url)}
+
+  // SW with blocker
+  async function registerSW(){
+    if(!('serviceWorker'in navigator))return;
+    const LIST=data.blocklist;const BLOCKED=data.blockerActive;const lang=data.lang;
+    const title=lang==='de'?'Stopp – atme durch':'Stop – breathe';
+    const text=lang==='de'?'Diese Seite ist blockiert. Dein Streak ist wichtiger.':'This page is blocked. Your streak matters more.';
+    const btn=lang==='de'?'Atem-Spiel starten':'Start breathing';
+    const BLOCK_HTML=`<!doctype html><html><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><title>${title}</title><style>body{margin:0;background:#0f172a;color:#e2e8f0;font-family:system-ui;display:flex;align-items:center;justify-content:center;height:100vh;text-align:center;padding:20px}h1{font-size:28px;margin:0 0 12px;color:#ef4444}p{color:#94a3b8;margin:0 0 20px}button{background:#22c55e;color:#052e16;border:none;padding:14px 20px;border-radius:12px;font-weight:700;font-size:16px;cursor:pointer}</style></head><body><div><h1>${title}</h1><p>${text}</p><button onclick="location.href='/?breath=1'">${btn}</button></div></body></html>`;
+    const sw=`const CACHE='cleandays-v25';const BLOCKED=${BLOCKED};const LIST=${JSON.stringify(LIST)};const BLOCK_HTML=${JSON.stringify(BLOCK_HTML)};self.addEventListener('install',e=>{self.skipWaiting();e.waitUntil(caches.open(CACHE).then(c=>c.addAll(['./']).catch(()=>{})))});self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(k=>Promise.all(k.filter(x=>x!==CACHE).map(x=>caches.delete(x))))) });self.addEventListener('fetch',e=>{try{const u=new URL(e.request.url);if(BLOCKED&&LIST.some(d=>u.hostname===d||u.hostname.endsWith('.'+d))){e.respondWith(new Response(BLOCK_HTML,{headers:{'Content-Type':'text/html; charset=utf-8'}}));return}}catch{};e.respondWith(fetch(e.request).then(r=>{caches.open(CACHE).then(c=>c.put(e.request,r.clone()));return r}).catch(()=>caches.match(e.request).then(m=>m||caches.match('./'))))});`;
+    try{const blob=new Blob([sw],{type:'application/javascript'});const url=URL.createObjectURL(blob);await navigator.serviceWorker.register(url);}catch(e){}
+  }
+
+  // events
+  successBtn.onclick=successDay;
+  resetBtn.addEventListener('pointerdown',startHold);['pointerup','pointerleave','pointercancel'].forEach(ev=>resetBtn.addEventListener(ev,cancelHold));
+  nextTipBtn.onclick=showTip; gameBtn.onclick=startGame; stopGameBtn.onclick=stopGameCleanup;
+  exportBtn.onclick=()=>{const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=`cleandays-backup-${getToday()}.json`;a.click();URL.revokeObjectURL(url);showToast(tt('toastBackup'))};
+  importBtn.onclick=()=>importFile.click(); importFile.onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const p=JSON.parse(r.result);data={...data,...p};saveData();applyLang();loadDiaryToday();blocklistInput.value=data.blocklist.join('\n');renderPinDots();showToast(tt('toastImportOk'));registerSW();if(data.pinHash)setTimeout(showLock,300)}catch{showToast(tt('toastImportFail'))}};r.readAsText(f);e.target.value=''};
+  emergencyBtn.onclick=openEmergency; emergencyClose.onclick=closeEmergency; emergencyModal.onclick=e=>{if(e.target===emergencyModal)closeEmergency()};
+  actionBlocker.onclick=()=>{blockerLinks.hidden=!blockerLinks.hidden;document.getElementById('blockerCard').scrollIntoView({behavior:'smooth'})};
+  actionTimer.onclick=startBreathTimer; timerStop.onclick=()=>{stopBreathTimer();showToast(tt('toastTimerStop'))};
+  actionWalk.onclick=()=>{closeEmergency();walkOverlay.hidden=false;document.body.style.overflow='hidden'}; walkDone.onclick=()=>{walkOverlay.hidden=true;document.body.style.overflow='';showToast(tt('toastWelcome'))};
+  diaryHeader.onclick=toggleDiary; diaryToggle.onclick=e=>{e.stopPropagation();toggleDiary()}; diaryText.oninput=()=>{diaryCounter.textContent=`${diaryText.value.length}/500`;diaryDot.hidden=!diaryText.value.trim()}; diarySave.onclick=saveDiary;
+  keypad.onclick=e=>{const b=e.target.closest('.key');if(!b)return;if(Date.now()<lockoutUntil)return;if(navigator.vibrate)navigator.vibrate(10);const maxLen=data.pinLength||4;if(b.dataset.num && pinInput.length<maxLen){pinInput+=b.dataset.num;updDots();showPinPreview(b.dataset.num);if(pinInput.length===maxLen)setTimeout(checkPin,120);}else if(b.dataset.del){pinInput=pinInput.slice(0,-1);updDots();}};
+  togglePeek.onclick=()=>{peekEnabled=!peekEnabled;localStorage.setItem('pin_peek',peekEnabled?'1':'0');updatePeekIcon();if(navigator.vibrate)navigator.vibrate(10)};
+  bioBtn.onclick=()=>{if(navigator.vibrate)navigator.vibrate(10);authenticateBiometric()};
+  forgotPin.onclick=()=>{wipeModal.hidden=false;wipeInput.value='';wipeInput.style.borderColor='';setTimeout(()=>wipeInput.focus(),100)};
+  wipeCancel.onclick=()=>wipeModal.hidden=true;
+  wipeConfirm.onclick=()=>{const expected=data.lang==='de'?'LÖSCHEN':'DELETE';if(wipeInput.value.trim().toUpperCase()===expected){localStorage.removeItem(STORAGE_KEY);localStorage.removeItem('cleandays_v24');localStorage.removeItem('cleandays_v23');location.reload();}else{if(navigator.vibrate)navigator.vibrate([30,20,30]);wipeInput.style.borderColor='#ef4444';setTimeout(()=>wipeInput.style.borderColor='',600);}};
+  len4Btn.onclick=()=>{selectedPinLen=4;len4Btn.classList.add('active');len6Btn.classList.remove('active');pinInput1.maxLength=4;pinInput2.maxLength=4;pinInput1.placeholder='••••';pinInput2.placeholder='••••';};
+  len6Btn.onclick=()=>{selectedPinLen=6;len6Btn.classList.add('active');len4Btn.classList.remove('active');pinInput1.maxLength=6;pinInput2.maxLength=6;pinInput1.placeholder='••••••';pinInput2.placeholder='••••••';};
+  pinInput1.oninput=()=>pinInput1.value=pinInput1.value.replace(/\D/g,'').slice(0,selectedPinLen); pinInput2.oninput=()=>pinInput2.value=pinInput2.value.replace(/\D/g,'').slice(0,selectedPinLen);
+  pinSaveBtn.onclick=async()=>{const a=pinInput1.value.trim(),b=pinInput2.value.trim();const len=selectedPinLen;if(!new RegExp(`^\\d{${len}}$`).test(a)){showToast(len+tt('pinNeed'));return}if(a!==b){showToast(tt('toastPinNoMatch'));return}data.pinHash=btoa(a);data.pinLength=len;saveData();hidePinSetup();renderPinDots();showToast(tt('toastPinSaved'));if(window.PublicKeyCredential){try{const avail=await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable();if(avail&&!data.webauthnRaw){if(confirm(data.lang==='de'?'Face ID / Geräte-PIN aktivieren?':'Enable Face ID / Device PIN?')){await registerBiometric()}}}catch{}}updateBioButton()}; pinSkipBtn.onclick=hidePinSetup; pinBtn.onclick=showPinSetup;
+  langToggle.onclick=()=>{data.lang=data.lang==='de'?'en':'de';saveData();applyLang();registerSW();showTip();};
+  toast.onclick=()=>{if(!undoData)return;data.streak=undoData.streak;data.lastDate=undoData.lastDate;saveData();updateUI();undoData=null;clearTimeout(undoTimeout);toast.classList.remove('show','undo-active');showToast(tt('undo'))};
+  blockerToggle.onclick=()=>{data.blockerActive=!data.blockerActive;saveData();updateBlockerToggle();showToast(data.blockerActive?tt('toastBlockOn'):tt('toastBlockOff'));registerSW()}; blocklistSave.onclick=saveBlocklist; blocklistExport.onclick=exportBlocklist;
+  miniGo.onclick=()=>{let v=miniUrl.value.trim();if(!v)return;if(!/^https?:/i.test(v))v='https://'+v;let host='';try{host=new URL(v).hostname}catch{showToast('URL?');return}const blocked=data.blockerActive&&data.blocklist.some(d=>host===d||host.endsWith('.'+d));if(blocked){showToast(tt('toastBlocked'));document.querySelector('[data-game="breathe"]').click();startGame()}else{window.open(v,'_blank','noopener');showToast(tt('toastOpened'))}};
+
+  // init
+  loadData();applyLang();renderPinDots();updatePeekIcon();if(!tipText.textContent)showTip();updateGameUI();loadDiaryToday();blocklistInput.value=data.blocklist.join('\n');updateBlockerToggle();
+  if(localStorage.getItem('diary_open')==='1'){diaryBody.hidden=false;diaryToggle.textContent='▲'}
+  const todayInit=getToday();lastSeenDay=data._lastSeen||todayInit;if(lastSeenDay!==todayInit)handleDayChange(lastSeenDay);data._lastSeen=todayInit;lastSeenDay=todayInit;saveData();
+  setInterval(minuteCheck,30000);minuteCheck();initSec();registerSW();
+  if(location.search.includes('breath=1')){setTimeout(()=>{document.querySelector('[data-game="breathe"]').click();gameCard.hidden=false;startGame()},400)}
+})();
 </script>
 </body>
 </html>
